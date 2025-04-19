@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -103,6 +104,7 @@ func getCity(c *gin.Context) {
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.GET("/cities", getCities)
 	router.GET("/city", getCity)
 	router.Run("0.0.0.0:8080")

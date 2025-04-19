@@ -4,9 +4,14 @@ import { useState } from 'react'
 import './App.css'
 import MapComponent from './MapComponent'
 import 'leaflet/dist/leaflet.css'
+//import MarkersComponent from './MarkersComponent';
 
 function App() {
-  return <MapComponent />;
+  return (
+    <>
+      <MapComponent />
+    </>
+  );
 }
 
 export default App
