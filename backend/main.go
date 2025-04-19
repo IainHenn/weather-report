@@ -101,14 +101,29 @@ func getCity(c *gin.Context) {
 		city_id)
 
 	type city struct {
-		ID   int     `json:"id"`
-		Name string  `json:"name"`
-		Lat  float64 `json:"lat"`
-		Lon  float64 `json:"lon"`
+		ID       int     `json:"id"`
+		Name     string  `json:"name"`
+		Lat      float64 `json:"lat"`
+		Lon      float64 `json:"lon"`
+		Sunrise  string  `json:"sunrise"`
+		Sunset   string  `json:"sunset"`
+		Temp     float64 `json:"temp"`
+		TempMin  float64 `json:"temp_min"`
+		TempMax  float64 `json:"temp_max"`
+		Humidity int     `json:"humidity"`
 	}
 
 	var cityData city
-	err = row.Scan(&cityData.ID, &cityData.Name, &cityData.Lat, &cityData.Lon)
+	err = row.Scan(&cityData.ID,
+		&cityData.Name,
+		&cityData.Lat,
+		&cityData.Lon,
+		&cityData.Sunrise,
+		&cityData.Sunset,
+		&cityData.Temp,
+		&cityData.TempMin,
+		&cityData.TempMax,
+		&cityData.Humidity)
 
 	fmt.Println("City Data: ", cityData)
 
