@@ -31,7 +31,7 @@ func getCities(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query("SELECT id, name, lat, lon FROM locations")
+	rows, err := db.Query("SELECT id, name, lat, lon FROM locations LIMIT 500")
 
 	if err != nil {
 		fmt.Println("Error querying from table!")

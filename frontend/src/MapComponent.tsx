@@ -18,14 +18,20 @@ function MapComponent() {
     }, []);
 
     return (
-        <>
-            <MapContainer center={[38.7946,-98.5348]} zoom={4.5} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <MarkersComponent/>
-            </MapContainer> 
+        <>  <div id="map-wrapper">
+                <div id="map">
+                    <MapContainer center={[38.7946,-98.5348]} zoom={4.5} style={{ height: '100vh', width: '100vw', margin: 0, padding: 0}} dragging={true} scrollWheelZoom={false}>
+                        <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <MarkersComponent/>
+                    </MapContainer> 
+                </div>
+
+                <div style={{ position: 'absolute', top: '20px', right: '20px', width: '16rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} id="overlay-stats">
+                </div>
+            </div>
         </>
     )
 }

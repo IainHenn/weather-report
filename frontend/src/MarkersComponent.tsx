@@ -2,7 +2,7 @@ import { useEffect, useState} from 'react';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import {Marker, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { LeafletMouseEvent } from 'leaflet';
+//import { LeafletMouseEvent } from 'leaflet';
 
 function MarkersComponent() {
     const [cities, setCities] = useState([]);
@@ -40,7 +40,12 @@ function retrieveInfo(cityId: number) {
     fetch(`http://localhost:8080/city?id=${cityId}`)
         .then(resp => resp.json())
         .then(city => {
-            console.log(`city: ${JSON.stringify(city)}`);
+            const overlayStatsDiv = document.getElementById('overlay-stats');
+            if (overlayStatsDiv) {
+                overlayStatsDiv.innerHTML = `<h1 class="font-mono text-blue-500">${city.name}</h1>`;
+            } else {
+                overlayStatsDiv.innerHTML = `<h1>Error! No data on city ID ${cityId} was found!</h1>`;
+            }
         })
         .catch(err => console.log(err))
 }
