@@ -79,22 +79,51 @@ func getCity(c *gin.Context) {
 		return
 	}
 
-	row := db.QueryRow("SELECT id, name, lon, lat FROM locations WHERE id = $1", city_id)
-
-	if err != nil {
-		fmt.Println("Error querying database!")
-		return
-	}
+	row := db.QueryRow(`SELECT 
+							l.id,
+							l.name,
+							l.lat,
+							l.lon,
+							ws.sunrise,
+							ws.sunset,
+							mw.temp,
+							mw.temp_min,
+							mw.temp_max,
+							mw.humidity
+						FROM locations l
+						JOIN weather_snapshots ws 
+						ON ws.location_id = l.id
+						JOIN main_weather mw 
+						ON mw.snapshot_id = ws.id
+						WHERE l.id = $1
+						ORDER BY ws.sunset DESC
+						LIMIT 1`,
+		city_id)
 
 	type city struct {
-		ID   int     `json:"id"`
-		Name string  `json:"name"`
-		Lat  float64 `json:"lat"`
-		Lon  float64 `json:"lon"`
+		ID       int     `json:"id"`
+		Name     string  `json:"name"`
+		Lat      float64 `json:"lat"`
+		Lon      float64 `json:"lon"`
+		Sunrise  string  `json:"sunrise"`
+		Sunset   string  `json:"sunset"`
+		Temp     float64 `json:"temp"`
+		TempMin  float64 `json:"temp_min"`
+		TempMax  float64 `json:"temp_max"`
+		Humidity int     `json:"humidity"`
 	}
 
 	var cityData city
-	err = row.Scan(&cityData.ID, &cityData.Name, &cityData.Lat, &cityData.Lon)
+	err = row.Scan(&cityData.ID,
+		&cityData.Name,
+		&cityData.Lat,
+		&cityData.Lon,
+		&cityData.Sunrise,
+		&cityData.Sunset,
+		&cityData.Temp,
+		&cityData.TempMin,
+		&cityData.TempMax,
+		&cityData.Humidity)
 
 	fmt.Println("City Data: ", cityData)
 
