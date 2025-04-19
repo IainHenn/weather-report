@@ -79,12 +79,26 @@ func getCity(c *gin.Context) {
 		return
 	}
 
-	row := db.QueryRow("SELECT id, name, lon, lat FROM locations WHERE id = $1", city_id)
-
-	if err != nil {
-		fmt.Println("Error querying database!")
-		return
-	}
+	row := db.QueryRow(`SELECT 
+							l.id,
+							l.name,
+							l.lat,
+							l.lon,
+							ws.sunrise,
+							ws.sunset,
+							mw.temp,
+							mw.temp_min,
+							mw.temp_max,
+							mw.humidity
+						FROM locations l
+						JOIN weather_snapshots ws 
+						ON ws.location_id = l.id
+						JOIN main_weather mw 
+						ON mw.snapshot_id = ws.id
+						WHERE l.id = $1
+						ORDER BY ws.sunset DESC
+						LIMIT 1`,
+		city_id)
 
 	type city struct {
 		ID   int     `json:"id"`
