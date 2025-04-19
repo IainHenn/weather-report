@@ -1,12 +1,9 @@
 package main
 
 import (
-	//"net/http"
 	"database/sql"
 	"fmt"
 	"net/http"
-
-	//"github.com/gin-gonic/gin"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
