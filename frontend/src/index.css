@@ -4,19 +4,16 @@
 @tailwind utilities;
 
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  @apply bg-red-500 text-white;
-}
-
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
   background-color: rgb(6, 6, 28);
+}
+
+
+h1, li {
+font-family: 'Special Gothic Expanded One', sans-serif;
 }
 
 .map, .map-wrapper{

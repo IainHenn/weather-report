@@ -29,7 +29,7 @@ function MapComponent() {
                     </MapContainer> 
                 </div>
 
-                <div style={{ position: 'absolute', top: '20px', right: '20px', width: '16rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} id="overlay-stats">
+                <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} id="overlay-stats">
                 </div>
             </div>
         </>

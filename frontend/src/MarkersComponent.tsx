@@ -25,9 +25,6 @@ function MarkersComponent() {
                         <Marker key={city.id} position={[city.lat, city.lon]} eventHandlers={{
                             click: () => retrieveInfo(city.id),
                         }}>
-                            <Popup>
-                                <strong>{city.name}</strong>
-                            </Popup>
                         </Marker>
                     );
                 })}
@@ -42,7 +39,19 @@ function retrieveInfo(cityId: number) {
         .then(city => {
             const overlayStatsDiv = document.getElementById('overlay-stats');
             if (overlayStatsDiv) {
-                overlayStatsDiv.innerHTML = `<h1 class="font-mono text-blue-500">${city.name}</h1>`;
+                overlayStatsDiv.innerHTML = `
+                    <h1 class="text-blue-200 text-4xl text-center">
+                        ${city.name}
+                    </h1>
+                    <ul>
+                        <li class="text-blue-200 text-2xl">Sunrise: ${city.sunrise}</li>
+                        <li class="text-blue-200 text-2xl">Sunset: ${city.sunset}</li>
+                        <li class="text-blue-200 text-2xl">Temperature: ${city.temp}</li>
+                        <li class="text-blue-200 text-2xl">Minimum Temperature: ${city.temp_min}</li>
+                        <li class="text-blue-200 text-2xl">Maximum Temperature: ${city.temp_max}</li>
+                        <li class="text-blue-200 text-2xl">Humidity: ${city.humidity}</li>
+                    </ul>
+                `;
             } else {
                 overlayStatsDiv.innerHTML = `<h1>Error! No data on city ID ${cityId} was found!</h1>`;
             }
