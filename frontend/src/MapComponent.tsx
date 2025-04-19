@@ -1,23 +1,33 @@
 import { useEffect } from 'react';
-import L from 'leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import MarkersComponent from './MarkersComponent'; // Import MarkersComponent
+
 
 function MapComponent() {
+    //[38.7946,-98.5348], 4.5
+
     useEffect(() => {
-        var map = L.map('map').setView([38.7946,-98.5348], 4.5);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-
-        console.log("inside MapComponent");
-
         return () => {
-            map.remove()
+            const container = document.querySelector('.leaflet-container');
+            if (container && container._leaflet_id) {
+                // @ts-ignore
+                container._leaflet_id = null;  // force Leaflet to release the container
+            }
         };
     }, []);
 
-    return <div id="map" style={{ height: '100vh', width: '100%' }}></div>;
+    return (
+        <>
+            <MapContainer center={[38.7946,-98.5348]} zoom={4.5} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <MarkersComponent/>
+            </MapContainer> 
+        </>
+    )
 }
 
 export default MapComponent;

@@ -4,13 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
 func getCities(c *gin.Context) {
-	connectionStr := "postgres://postgres:***REMOVED***@10.0.0.223:5433/airflow?sslmode=disable"
+	dbUser := os.Getenv("DB_USER")
+	dbPW := os.Getenv("DB_PW")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+
+	connectionStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbUser, dbPW, dbHost, dbName)
 	db, err := sql.Open("postgres", connectionStr)
 
 	if err != nil {
@@ -56,7 +63,7 @@ func getCities(c *gin.Context) {
 }
 
 func getCity(c *gin.Context) {
-	connectionStr := "postgres://postgres:***REMOVED***@10.0.0.223:5433/airflow?sslmode=disable"
+	connectionStr := "postgres://postgres:Iainh2005@10.0.0.223:5433/airflow?sslmode=disable"
 	db, err := sql.Open("postgres", connectionStr)
 	city_id := c.Query("id")
 
@@ -103,6 +110,7 @@ func getCity(c *gin.Context) {
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.GET("/cities", getCities)
 	router.GET("/city", getCity)
 	router.Run("0.0.0.0:8080")
