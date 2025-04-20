@@ -146,7 +146,7 @@ func getWeatherForecast(c *gin.Context) {
 	lat := c.Query("lat")
 	lon := c.Query("lon")
 
-	input := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&appid=%s", lat, lon, apiKey)
+	input := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&units=metric&appid=%s", lat, lon, apiKey)
 	resp, err := http.NewRequest("GET", input, nil)
 
 	if err != nil {
