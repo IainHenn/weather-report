@@ -47,13 +47,13 @@ function retrieveInfo(cityId: number) {
                     <h1 class="text-blue-200 text-4xl text-center">
                         ${city.name}
                     </h1>
-                    <ul>
-                        <li class="text-blue-200 text-2xl">Sunrise: ${city.sunrise}</li>
-                        <li class="text-blue-200 text-2xl">Sunset: ${city.sunset}</li>
-                        <li class="text-blue-200 text-2xl">Temperature: ${city.temp}</li>
-                        <li class="text-blue-200 text-2xl">Minimum Temperature: ${city.temp_min}</li>
-                        <li class="text-blue-200 text-2xl">Maximum Temperature: ${city.temp_max}</li>
-                        <li class="text-blue-200 text-2xl">Humidity: ${city.humidity}</li>
+                    <ul class="space-y-4">
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunrise: ${city.sunrise}</li>
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunset: ${city.sunset}</li>
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Temperature: ${city.temp}</li>
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Minimum Temperature: ${city.temp_min}</li>
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Maximum Temperature: ${city.temp_max}</li>
+                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Humidity: ${city.humidity}</li>
                     </ul>
                 `;
             } else {
