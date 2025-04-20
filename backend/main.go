@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -136,12 +138,108 @@ func getCity(c *gin.Context) {
 
 }
 
+func getWeatherForecast(c *gin.Context) {
+	fmt.Println("Entered getWeatherForecast!")
+	apiKey := os.Getenv("OPEN_WEATHER_MAP_API_KEY2")
+	client := &http.Client{}
+
+	lat := c.Query("lat")
+	lon := c.Query("lon")
+
+	input := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&appid=%s", lat, lon, apiKey)
+	resp, err := http.NewRequest("GET", input, nil)
+
+	if err != nil {
+		fmt.Println("Error making request!")
+		return
+	}
+
+	result, err := client.Do(resp)
+	if err != nil {
+		fmt.Println("Error doing request!")
+		return
+	}
+	defer result.Body.Close()
+
+	body, err := io.ReadAll(result.Body)
+	if err != nil {
+		fmt.Println("Error reading response body!")
+		return
+	}
+
+	var responseData map[string]interface{}
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		fmt.Println("Error parsing JSON response:", err)
+		return
+	}
+
+	type forecastData struct {
+		ForecastDatesUnix []float64 `json:"forecast_dates_unix"`
+		ForecaseDates     []string  `json:"forecast_dates"`
+		ForeCastTemps     []float64 `json:"forecast_temps"`
+	}
+
+	var ForecastDatesUnix []float64
+	var ForecaseDates []string
+	var ForeCastTemps []float64
+
+	if responseData["cod"] == "200" {
+		if list, ok := responseData["list"].([]interface{}); ok {
+			for _, item := range list {
+
+				if itemMap, ok := item.(map[string]interface{}); ok {
+
+					if time, ok := itemMap["dt"].(float64); ok { // dt is usually a float64 (UNIX timestamp)
+						ForecastDatesUnix = append(ForecastDatesUnix, time)
+					} else {
+						ForecastDatesUnix = append(ForecastDatesUnix, -999.00)
+					}
+
+					if time, ok := itemMap["dt_txt"].(string); ok {
+						ForecaseDates = append(ForecaseDates, time)
+					} else {
+						ForecaseDates = append(ForecaseDates, "NULL")
+					}
+
+					if mainMap, ok := itemMap["main"].(map[string]interface{}); ok {
+						if temp, ok := mainMap["temp"].(float64); ok {
+							ForeCastTemps = append(ForeCastTemps, temp)
+						} else {
+							ForeCastTemps = append(ForeCastTemps, -999.00)
+						}
+					} else {
+						fmt.Println("Error: 'main' field is not a map")
+					}
+				} else {
+					fmt.Println("Error: item is not a map")
+				}
+			}
+		}
+	}
+
+	if err != nil {
+		fmt.Println("Error doing request!")
+		return
+	}
+
+	forecast := forecastData{
+		ForecastDatesUnix: ForecastDatesUnix,
+		ForecaseDates:     ForecaseDates,
+		ForeCastTemps:     ForeCastTemps,
+	}
+
+	c.IndentedJSON(http.StatusOK, forecast)
+
+}
+
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/cities", getCities)
 	router.GET("/city", getCity)
+	router.GET("/forecast", getWeatherForecast)
 	router.Run("0.0.0.0:8080")
 	fmt.Println("Running!")
 }
