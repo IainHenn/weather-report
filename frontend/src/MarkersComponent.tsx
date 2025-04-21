@@ -7,9 +7,8 @@ import * as d3 from "d3";
 
 function MarkersComponent() {
     const [cities, setCities] = useState([]);
-    console.log("Inside MarkersComponent");
+    const [selectedCityId,setSelectedCityId] = useState(null);
     useEffect(() => {
-        console.log("Inside MarkersComponent-useEffect");
         fetch("http://localhost:8080/cities")
         .then(resp => resp.json())
         .then(cities => {
@@ -21,49 +20,63 @@ function MarkersComponent() {
         <>
             <MarkerClusterGroup chunkedLoading>
                 {cities.map((city, index) => {
-                    console.log(city);
                     return (
                         <Marker key={city.id} position={[city.lat, city.lon]} eventHandlers={{
                             click: () => {
-                                retrieveInfo(city.id);
-                                retrieveForecast(city.lat, city.lon);
+                                setSelectedCityId(city.id);
+                                //retrieveForecast(city.lat, city.lon);
                             }
                         }}>
                         </Marker>
                     );
                 })}
             </MarkerClusterGroup>
+            <>
+                {console.log("Selected City Id:", selectedCityId)}
+            </>
+            {selectedCityId && <RetrieveInfo cityId={selectedCityId} />}
+
         </>
     )
 }
 
-function retrieveInfo(cityId: number) {
-    fetch(`http://localhost:8080/city?id=${cityId}`)
+function RetrieveInfo({ cityId }) {
+    console.log("RetrieveInfo cityId:", cityId);
+    const [city,setCity] = useState(null);
+
+    useEffect(() => {
+        fetch(`http://localhost:8080/city?id=${cityId}`)
         .then(resp => resp.json())
         .then(city => {
-            const overlayStatsDiv = document.getElementById('overlay-stats');
-            if (overlayStatsDiv) {
-                overlayStatsDiv.innerHTML = `
-                    <h1 class="text-blue-200 text-4xl text-center">
-                        ${city.name}
-                    </h1>
-                    <ul class="space-y-4">
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunrise: ${city.sunrise}</li>
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunset: ${city.sunset}</li>
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Temperature: ${city.temp}</li>
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Minimum Temperature: ${city.temp_min}</li>
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Maximum Temperature: ${city.temp_max}</li>
-                        <li class="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Humidity: ${city.humidity}</li>
-                    </ul>
-                `;
-            } else {
-                overlayStatsDiv.innerHTML = `<h1>Error! No data on city ID ${cityId} was found!</h1>`;
-            }
+            console.log(city);
+            setCity(city);
         })
         .catch(err => console.log(err))
+    }, [cityId])    
+    
+    if(!city){
+        console.log("City:", city); 
+        return <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="overlay-stats">
+                            <h1 className="text-blue-200 text-4xl text-center">Loading...</h1>
+            </div>;
+    }
+
+        return(
+            <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="overlay-stats">
+                <h1 className="text-blue-200 text-4xl text-center">{city.name}</h1>
+                    <ul className="space-y-4">
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunrise: {city.sunrise}</li>
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunset: {city.sunset}</li>
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Temperature: {city.temp}</li>
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Minimum Temperature: {city.temp_min}</li>
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Maximum Temperature: {city.temp_max}</li>
+                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Humidity: {city.humidity}</li>
+                    </ul>
+            </div>
+        );
 }
     
-function retrieveForecast(cityLat: string, cityLon: string){
+/*function retrieveForecast(cityLat: string, cityLon: string){
     fetch(`http://localhost:8080/forecast?lat=${cityLat}&lon=${cityLon}`)
         .then(resp => resp.json())
         .then(data => {
@@ -173,6 +186,6 @@ function retrieveForecast(cityLat: string, cityLon: string){
             });
         })
         .catch(err => console.log(err))
-}
+}*/
 
 export default MarkersComponent;
