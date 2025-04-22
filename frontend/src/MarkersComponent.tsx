@@ -1,13 +1,15 @@
-import { useEffect, useState} from 'react';
+import { useEffect, useState, useRef} from 'react';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import {Marker, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import * as d3 from "d3";
+import { userInfo } from 'os';
 //import { LeafletMouseEvent } from 'leaflet';
 
 function MarkersComponent() {
     const [cities, setCities] = useState([]);
     const [selectedCityId,setSelectedCityId] = useState(null);
+    const [selectedForecast, setSelectedForecast] = useState(null);
     useEffect(() => {
         fetch("http://localhost:8080/cities")
         .then(resp => resp.json())
@@ -24,7 +26,7 @@ function MarkersComponent() {
                         <Marker key={city.id} position={[city.lat, city.lon]} eventHandlers={{
                             click: () => {
                                 setSelectedCityId(city.id);
-                                //retrieveForecast(city.lat, city.lon);
+                                setSelectedForecast({lat: city.lat, lon: city.lon});
                             }
                         }}>
                         </Marker>
@@ -32,10 +34,11 @@ function MarkersComponent() {
                 })}
             </MarkerClusterGroup>
             <>
-                {console.log("Selected City Id:", selectedCityId)}
+            <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="overlay-stats">
+                {selectedCityId && <RetrieveInfo cityId={selectedCityId} />}
+                {selectedForecast && <RetrieveForecast cityLat={selectedForecast.lat} cityLon={selectedForecast.lon}/>}
+            </div>
             </>
-            {selectedCityId && <RetrieveInfo cityId={selectedCityId} />}
-
         </>
     )
 }
@@ -62,25 +65,31 @@ function RetrieveInfo({ cityId }) {
     }
 
         return(
-            <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="overlay-stats">
+            <>
                 <h1 className="text-blue-200 text-4xl text-center">{city.name}</h1>
-                    <ul className="space-y-4">
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunrise: {city.sunrise}</li>
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunset: {city.sunset}</li>
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Temperature: {city.temp}</li>
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Minimum Temperature: {city.temp_min}</li>
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Maximum Temperature: {city.temp_max}</li>
-                        <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Humidity: {city.humidity}</li>
-                    </ul>
-            </div>
+                <ul className="space-y-4">
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunrise: {city.sunrise}</li>
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Sunset: {city.sunset}</li>
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Temperature: {city.temp}</li>
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Minimum Temperature: {city.temp_min}</li>
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Maximum Temperature: {city.temp_max}</li>
+                    <li className="inline-block p-4 text-black-200 text-2xl bg-blue-200 shadow rounded-lg">Humidity: {city.humidity}</li>
+                </ul>
+            </>
         );
 }
     
-/*function retrieveForecast(cityLat: string, cityLon: string){
-    fetch(`http://localhost:8080/forecast?lat=${cityLat}&lon=${cityLon}`)
+function RetrieveForecast({cityLat, cityLon}){
+    const chartRef = useRef();
+
+    useEffect(() => {
+        fetch(`http://localhost:8080/forecast?lat=${cityLat}&lon=${cityLon}`)
         .then(resp => resp.json())
         .then(data => {
             const groupedData: { [key: string]: { time: string; temperature: number }[] } = {};
+            const container = d3.select(chartRef.current);
+
+            container.selectAll("*").remove();
 
             data.forecast_dates.forEach((date: string, i: number) => {
                 const today = new Date();
@@ -103,16 +112,16 @@ function RetrieveInfo({ cityId }) {
                 });
             });
             console.log(groupedData);
-            const overlayStatsDiv = document.getElementById('overlay-stats');
-            const svg = d3.select(overlayStatsDiv)
+
+            const svg = container
             .append("svg")
             .attr("width", 600)
             .attr("height", 500)
             .style("background-color", "white");
 
             const margin = { top: 20, right: 30, bottom: 30, left: 40 };
-            const width = +svg.attr("width") - margin.left - margin.right;
-            const height = +svg.attr("height") - margin.top - margin.bottom;
+            const width = 600 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
 
             const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -186,6 +195,12 @@ function RetrieveInfo({ cityId }) {
             });
         })
         .catch(err => console.log(err))
-}*/
+    }, [cityLat,cityLon])
+
+    return (
+        <div ref={chartRef}></div>
+    )
+    
+}
 
 export default MarkersComponent;
