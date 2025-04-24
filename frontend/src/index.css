@@ -20,6 +20,7 @@ font-family: 'Special Gothic Expanded One', sans-serif;
   position: relative;
 }
 
+
 .overlay-stats {
   position: absolute;
 } 
@@ -27,6 +28,11 @@ font-family: 'Special Gothic Expanded One', sans-serif;
 #map {
   height: 100%;
   width: 100%;
+}
+
+.weather-summary {
+  display: flex;
+  gap: 1rem;
 }
 
 .leaflet-layer,

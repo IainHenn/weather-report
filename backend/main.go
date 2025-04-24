@@ -176,20 +176,21 @@ func getWeatherForecast(c *gin.Context) {
 
 	type forecastData struct {
 		ForecastDatesUnix []float64 `json:"forecast_dates_unix"`
-		ForecaseDates     []string  `json:"forecast_dates"`
+		ForeCastDates     []string  `json:"forecast_dates"`
 		ForeCastTemps     []float64 `json:"forecast_temps"`
+		ForeCastIcons     []string  `json:"forecast_icons"`
 	}
 
 	var ForecastDatesUnix []float64
-	var ForecaseDates []string
+	var ForeCastDates []string
 	var ForeCastTemps []float64
+	var ForeCastIcons []string
 
 	if responseData["cod"] == "200" {
 		if list, ok := responseData["list"].([]interface{}); ok {
 			for _, item := range list {
 
 				if itemMap, ok := item.(map[string]interface{}); ok {
-
 					if time, ok := itemMap["dt"].(float64); ok { // dt is usually a float64 (UNIX timestamp)
 						ForecastDatesUnix = append(ForecastDatesUnix, time)
 					} else {
@@ -197,9 +198,9 @@ func getWeatherForecast(c *gin.Context) {
 					}
 
 					if time, ok := itemMap["dt_txt"].(string); ok {
-						ForecaseDates = append(ForecaseDates, time)
+						ForeCastDates = append(ForeCastDates, time)
 					} else {
-						ForecaseDates = append(ForecaseDates, "NULL")
+						ForeCastDates = append(ForeCastDates, "NULL")
 					}
 
 					if mainMap, ok := itemMap["main"].(map[string]interface{}); ok {
@@ -210,6 +211,17 @@ func getWeatherForecast(c *gin.Context) {
 						}
 					} else {
 						fmt.Println("Error: 'main' field is not a map")
+					}
+
+					if weatherMap, ok := itemMap["weather"].([]interface{}); ok {
+						if len(weatherMap) > 0 {
+							if weatherMap, ok := weatherMap[0].(map[string]interface{}); ok {
+								icon := weatherMap["icon"].(string)
+								ForeCastIcons = append(ForeCastIcons, icon)
+							} else {
+								ForeCastIcons = append(ForeCastIcons, "NULL")
+							}
+						}
 					}
 				} else {
 					fmt.Println("Error: item is not a map")
@@ -225,10 +237,12 @@ func getWeatherForecast(c *gin.Context) {
 
 	forecast := forecastData{
 		ForecastDatesUnix: ForecastDatesUnix,
-		ForecaseDates:     ForecaseDates,
+		ForeCastDates:     ForeCastDates,
 		ForeCastTemps:     ForeCastTemps,
+		ForeCastIcons:     ForeCastIcons,
 	}
 
+	fmt.Println("forecast: ", forecast)
 	c.IndentedJSON(http.StatusOK, forecast)
 
 }
