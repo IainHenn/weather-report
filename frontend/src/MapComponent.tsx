@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import MarkersComponent from './MarkersComponent'; // Import MarkersComponent
-
+import MarkersComponent from './MarkersComponent';
+import UserComponent from './UserComponent.tsx';
 
 function MapComponent() {
     //[38.7946,-98.5348], 4.5
@@ -26,6 +26,7 @@ function MapComponent() {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         />
                         <MarkersComponent/>
+                        <UserComponent/>
                     </MapContainer> 
                 </div>
             </div>

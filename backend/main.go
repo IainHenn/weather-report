@@ -247,6 +247,54 @@ func getWeatherForecast(c *gin.Context) {
 
 }
 
+func searchCities(c *gin.Context) {
+	connectionStr := "postgres://postgres:Iainh2005@10.0.0.223:5433/airflow?sslmode=disable"
+	db, err := sql.Open("postgres", connectionStr)
+	input := c.Query("name")
+
+	if err != nil {
+		fmt.Println("Error opening database!")
+		return
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("Error connecting to database!")
+		return
+	}
+
+	rows, err := db.Query(`SELECT DISTINCT name, lat, lon
+					FROM locations
+					WHERE name ILIKE $1
+					LIMIT 10`, "%"+input+"%")
+
+	if err != nil {
+		fmt.Println("Error querying from table!")
+	}
+
+	type city struct {
+		Name string  `json:"name"`
+		Lat  float64 `json:"lat"`
+		Lon  float64 `json:"lon"`
+	}
+
+	var cities []city
+
+	for rows.Next() {
+		var c city
+		err := rows.Scan(&c.Name, &c.Lat, &c.Lon)
+		if err != nil {
+			fmt.Println("Error scanning row")
+			return
+		}
+		cities = append(cities, c)
+	}
+
+	c.IndentedJSON(http.StatusOK, cities)
+}
+
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
@@ -254,6 +302,7 @@ func main() {
 	router.GET("/cities", getCities)
 	router.GET("/city", getCity)
 	router.GET("/forecast", getWeatherForecast)
+	router.GET("/searchCities", searchCities)
 	router.Run("0.0.0.0:8080")
 	fmt.Println("Running!")
 }
