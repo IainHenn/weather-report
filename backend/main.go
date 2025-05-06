@@ -265,7 +265,7 @@ func searchCities(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query(`SELECT DISTINCT name, lat, lon
+	rows, err := db.Query(`SELECT DISTINCT id, name, lat, lon
 					FROM locations
 					WHERE name ILIKE $1
 					LIMIT 10`, "%"+input+"%")
@@ -275,6 +275,7 @@ func searchCities(c *gin.Context) {
 	}
 
 	type city struct {
+		ID   int     `json:"id"`
 		Name string  `json:"name"`
 		Lat  float64 `json:"lat"`
 		Lon  float64 `json:"lon"`
@@ -284,7 +285,7 @@ func searchCities(c *gin.Context) {
 
 	for rows.Next() {
 		var c city
-		err := rows.Scan(&c.Name, &c.Lat, &c.Lon)
+		err := rows.Scan(&c.ID, &c.Name, &c.Lat, &c.Lon)
 		if err != nil {
 			fmt.Println("Error scanning row")
 			return
