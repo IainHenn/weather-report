@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef} from 'react';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import {Marker, Popup} from 'react-leaflet';
+import {Marker, Popup, useMap} from 'react-leaflet';
+import { useSharedMap } from './MapContext';
 import 'leaflet/dist/leaflet.css';
+
 import * as d3 from "d3";
 import { userInfo } from 'os';
 import { icon } from 'leaflet';
@@ -27,7 +29,7 @@ function MarkersComponent() {
     return (
         <>
             <MarkerClusterGroup chunkedLoading>
-                {cities.map((city, index) => {
+                {cities.map((city) => {
                     return (
                         <Marker key={city.id} position={[city.lat, city.lon]} eventHandlers={{
                             click: () => {
@@ -340,23 +342,30 @@ function mostCommonIcon(data: {icon: string}[]) {
 
 function CitySearch(){
     const [query, setQuery] = useState('');
-    const [selectedCities, setSelectedCities] = useState<{ id: number; name: string }[]>([]);
+    const [selectedCities, setSelectedCities] = useState<City[]>([]);
     const [suggestions, setSuggestions] = useState([]);
+
+    interface City {
+        id: number;
+        name: string;
+        lat: number;
+        lon: number;
+    }
 
     useEffect(() => {
         if(query.length > 1){
             fetch(`http://localhost:8080/searchCities?name=${query}`)
             .then(resp => resp.json())
             .then(cities => {
-                console.log(cities);
+                console.log("query works!");
                 setSuggestions(cities || []);
             });
         }
     }, [query])
 
-    const addCity = (city) => {
+    const addCity = (city: City) => {
+        console.log("Adding... ", city.name);
         setSelectedCities([...selectedCities, city]);
-        console.log(city.name);
     }
 
     return (
@@ -366,14 +375,14 @@ function CitySearch(){
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onBlur={() => {
-                setTimeout(() => setSuggestions([]), 100);
+                setTimeout(() => setSuggestions([]), 200);
             }}
             className="w-full border p-2 rounded bg-white"
             placeholder="Search for a city"
           />
           {suggestions.length > 0 && (
             <ul className="absolute bg-white border mt-1 w-full z-10">
-              {suggestions.map((city) => (
+              {suggestions.map((city: City) => (
                 <li
                   key={city.id}
                   onClick={() => addCity(city)}
@@ -386,18 +395,37 @@ function CitySearch(){
           )}
     
           <div className="mt-2 flex flex-wrap gap-2">
-            {selectedCities.map((city) => (
-              <button
-                key={city.id}
-                type="button"
-                className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200"
-              >
-                {city.name}
-              </button>
-            ))}
+            {(() => {
+                const map = useSharedMap();
+                return selectedCities.map((city: City) => (
+                  <button
+                    onClick={() => goToCity(city.id, map)}
+                    key={city.id}
+                    type="button"
+                    className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200"
+                  >
+                    {city.name}
+                  </button>
+                ));
+            })()}
           </div>
         </div>
     );
+}
+
+function goToCity(cityId: number, map: L.Map | null) {
+
+    if (!map){
+        console.log("Error: Map doesn't exist");
+        return;
+    }
+    
+    fetch(`http://localhost:8080/city/latlon?id=${cityId}`)
+    .then(resp => resp.json())
+    .then(data => {
+        console.log("data received ", data);
+        map.setView([data.lat, data.lon], 10);
+    })
 }
 
 export default MarkersComponent;

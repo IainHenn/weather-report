@@ -187,7 +187,6 @@ func getWeatherForecast(c *gin.Context) {
 	if responseData["cod"] == "200" {
 		if list, ok := responseData["list"].([]interface{}); ok {
 			for _, item := range list {
-
 				if itemMap, ok := item.(map[string]interface{}); ok {
 					if time, ok := itemMap["dt"].(float64); ok { // dt is usually a float64 (UNIX timestamp)
 						ForecastDatesUnix = append(ForecastDatesUnix, time)
@@ -228,18 +227,12 @@ func getWeatherForecast(c *gin.Context) {
 		}
 	}
 
-	if err != nil {
-		fmt.Println("Error doing request!")
-		return
-	}
-
 	forecast := forecastData{
 		ForecastDatesUnix: ForecastDatesUnix,
 		ForeCastDates:     ForeCastDates,
 		ForeCastTemps:     ForeCastTemps,
 		ForeCastIcons:     ForeCastIcons,
 	}
-
 	c.IndentedJSON(http.StatusOK, forecast)
 
 }
@@ -293,6 +286,46 @@ func searchCities(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, cities)
 }
 
+func grabLatLon(c *gin.Context) {
+	fmt.Println("hi")
+	connectionStr := "postgres://postgres:Iainh2005@10.0.0.223:5433/airflow?sslmode=disable"
+	db, err := sql.Open("postgres", connectionStr)
+	input := c.Query("id")
+
+	if err != nil {
+		fmt.Println("Error opening database!")
+		return
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("Error connecting to database!")
+		return
+	}
+
+	row := db.QueryRow(`SELECT DISTINCT lat, lon
+					FROM locations
+					WHERE id = $1`, input)
+
+	type latLon struct {
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lon"`
+	}
+
+	var rowData latLon
+
+	err = row.Scan(&rowData.Lat, &rowData.Lon)
+	if err != nil {
+		fmt.Println("Error scanning row!")
+		return
+	}
+
+	fmt.Println("rowData ", rowData)
+	c.IndentedJSON(http.StatusOK, rowData)
+}
+
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
@@ -301,6 +334,7 @@ func main() {
 	router.GET("/city", getCity)
 	router.GET("/forecast", getWeatherForecast)
 	router.GET("/searchCities", searchCities)
+	router.GET("/city/latlon", grabLatLon)
 	router.Run("0.0.0.0:8080")
 	fmt.Println("Running!")
 }
