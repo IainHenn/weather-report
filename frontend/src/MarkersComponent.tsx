@@ -13,12 +13,16 @@ function MarkersComponent() {
     const [selectedCityId,setSelectedCityId] = useState(null);
     const [selectedForecast, setSelectedForecast] = useState(null);
     useEffect(() => {
-        fetch("http://localhost:8080/cities")
-        .then(resp => resp.json())
-        .then(cities => {
-            setCities(cities);
-        })
-        .catch(err => console.log(err))
+        const fetchCities = async () => {
+            try {
+                const resp = await fetch("http://localhost:8080/cities");
+                const cities = await resp.json();
+                setCities(cities);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchCities();
     }, []);
     return (
         <>
@@ -44,6 +48,12 @@ function MarkersComponent() {
                     <button onClick={() => {setSelectedCityId(null); setSelectedForecast(null);}} className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-lg rounded-full text-sm p-2.5 text-center inline-flex items-center">
                         <span className="text-lg">&rarr;</span>
                     </button>
+                </div>
+            )}
+
+            {selectedCityId && (
+                <div style={{ position: 'absolute', top: '20px', left: '45px', width: '40rem', height: '45rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="relevant-articles">
+                    <CitySearch cityId={selectedCityId} />
                 </div>
             )}
             </>
@@ -326,6 +336,68 @@ function mostCommonIcon(data: {icon: string}[]) {
         } 
     }
     return highestIcon;
+}
+
+function CitySearch(){
+    const [query, setQuery] = useState('');
+    const [selectedCities, setSelectedCities] = useState<{ id: number; name: string }[]>([]);
+    const [suggestions, setSuggestions] = useState([]);
+
+    useEffect(() => {
+        if(query.length > 1){
+            fetch(`http://localhost:8080/searchCities?name=${query}`)
+            .then(resp => resp.json())
+            .then(cities => {
+                console.log(cities);
+                setSuggestions(cities || []);
+            });
+        }
+    }, [query])
+
+    const addCity = (city) => {
+        setSelectedCities([...selectedCities, city]);
+        console.log(city.name);
+    }
+
+    return (
+        <div className="relative w-full max-w-md">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onBlur={() => {
+                setTimeout(() => setSuggestions([]), 100);
+            }}
+            className="w-full border p-2 rounded bg-white"
+            placeholder="Search for a city"
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute bg-white border mt-1 w-full z-10">
+              {suggestions.map((city) => (
+                <li
+                  key={city.id}
+                  onClick={() => addCity(city)}
+                  className="cursor-pointer p-2 hover:bg-gray-100"
+                >
+                  {city.name}
+                </li>
+              ))}
+            </ul>
+          )}
+    
+          <div className="mt-2 flex flex-wrap gap-2">
+            {selectedCities.map((city) => (
+              <button
+                key={city.id}
+                type="button"
+                className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200"
+              >
+                {city.name}
+              </button>
+            ))}
+          </div>
+        </div>
+    );
 }
 
 export default MarkersComponent;

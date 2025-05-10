@@ -33,7 +33,7 @@ func getCities(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query("SELECT id, name, lat, lon FROM locations LIMIT 500")
+	rows, err := db.Query("SELECT id, name, lat, lon FROM locations LIMIT 1000")
 
 	if err != nil {
 		fmt.Println("Error querying from table!")
@@ -127,10 +127,8 @@ func getCity(c *gin.Context) {
 		&cityData.TempMax,
 		&cityData.Humidity)
 
-	fmt.Println("City Data: ", cityData)
-
 	if err != nil {
-		print("Error scanning row")
+		fmt.Println("Error scanning row")
 		return
 	}
 
@@ -242,7 +240,6 @@ func getWeatherForecast(c *gin.Context) {
 		ForeCastIcons:     ForeCastIcons,
 	}
 
-	fmt.Println("forecast: ", forecast)
 	c.IndentedJSON(http.StatusOK, forecast)
 
 }
