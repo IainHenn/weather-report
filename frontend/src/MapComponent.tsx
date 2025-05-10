@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import MarkersComponent from './MarkersComponent'; // Import MarkersComponent
-
+import MarkersComponent from './MarkersComponent';
 
 function MapComponent() {
     //[38.7946,-98.5348], 4.5
@@ -18,14 +17,17 @@ function MapComponent() {
     }, []);
 
     return (
-        <>
-            <MapContainer center={[38.7946,-98.5348]} zoom={4.5} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <MarkersComponent/>
-            </MapContainer> 
+        <>  <div id="map-wrapper">
+                <div id="map">
+                    <MapContainer center={[38.7946,-98.5348]} zoom={4.5} style={{ height: '100vh', width: '100vw', margin: 0, padding: 0}} dragging={true} scrollWheelZoom={false}>
+                        <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <MarkersComponent/>
+                    </MapContainer> 
+                </div>
+            </div>
         </>
     )
 }
