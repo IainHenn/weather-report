@@ -372,6 +372,11 @@ function CitySearch(){
     }
 
     useEffect(() => {
+        const storedCities = localStorage.getItem("selectedCities");
+        if(storedCities){
+            console.log(`storedCities: ${storedCities}`);
+            setSelectedCities(JSON.parse(storedCities));
+        }
         if(query.length > 1){
             fetch(`http://localhost:8080/searchCities?name=${query}`)
             .then(resp => resp.json())
@@ -382,7 +387,10 @@ function CitySearch(){
     }, [query])
 
     const addCity = (city: City) => {
-        setSelectedCities([...selectedCities, city]);
+        const updatedCities = [...selectedCities, city];
+        setSelectedCities(updatedCities);
+        localStorage.setItem("selectedCities", JSON.stringify(updatedCities));
+        console.log(`storedCities: ${JSON.parse(localStorage.getItem("selectedCities"))}`);
     }
 
     return (
