@@ -323,6 +323,63 @@ func grabLatLon(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, rowData)
 }
 
+func grabBoundedCities(c *gin.Context) {
+	dbUser := os.Getenv("DB_USER")
+	dbPW := os.Getenv("DB_PW")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+
+	connectionStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbUser, dbPW, dbHost, dbName)
+	db, err := sql.Open("postgres", connectionStr)
+
+	minLat := c.Query("minLat")
+	maxLat := c.Query("maxLat")
+	minLon := c.Query("minLon")
+	maxLon := c.Query("maxLon")
+
+	if err != nil {
+		fmt.Println("Error opening database:", err)
+		return
+	}
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("Error connecting to database:", err)
+		return
+	}
+
+	rows, err := db.Query("SELECT id, name, lat, lon FROM locations WHERE (lat > $1 AND lat < $2) AND (lon > $3 AND lon < $4)", minLat, maxLat, minLon, maxLon)
+
+	if err != nil {
+		fmt.Println("Error querying from table!")
+		return
+	}
+
+	defer rows.Close()
+
+	type city struct {
+		ID   int     `json:"id"`
+		Name string  `json:"name"`
+		Lat  float64 `json:"lat"`
+		Lon  float64 `json:"lon"`
+	}
+
+	var cities []city
+
+	for rows.Next() {
+		var c city
+		err := rows.Scan(&c.ID, &c.Name, &c.Lat, &c.Lon)
+		if err != nil {
+			fmt.Println("Error scanning row")
+			return
+		}
+		cities = append(cities, c)
+	}
+
+	c.IndentedJSON(http.StatusOK, cities)
+}
+
+
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
@@ -332,6 +389,7 @@ func main() {
 	router.GET("/forecast", getWeatherForecast)
 	router.GET("/searchCities", searchCities)
 	router.GET("/city/latlon", grabLatLon)
+	router.GET("/citiesInBounds", grabBoundedCities)
 	router.Run("0.0.0.0:8080")
 	fmt.Println("Running!")
 }
