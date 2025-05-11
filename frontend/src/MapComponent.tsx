@@ -23,6 +23,13 @@ function SetViewOnCoordinatesChange({ coords }: { coords: { latitude: number; lo
 function MapComponent() {
     const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number; zoom: number}>({ latitude: 38.7946, longitude: -98.5348, zoom: 4.5});
 
+function MapProvider({ children }: { children: React.ReactNode }) {
+    const map = useMap();
+    return <MapContext.Provider value={map}>{children}</MapContext.Provider>;
+}
+
+
+function MapComponent() {
     useEffect(() => {
         const container = document.querySelector('.leaflet-container');
 

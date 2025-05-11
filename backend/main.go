@@ -379,6 +379,7 @@ func grabBoundedCities(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, cities)
 }
 
+
 func main() {
 	fmt.Println("Starting server on port 8080...")
 	router := gin.Default()
