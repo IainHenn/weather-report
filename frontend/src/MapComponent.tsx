@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import MarkersComponent from './MarkersComponent';
+import { MapContext } from './MapContext';
+
+
+function MapProvider({ children }: { children: React.ReactNode }) {
+    const map = useMap();
+    return <MapContext.Provider value={map}>{children}</MapContext.Provider>;
+}
+
 
 function MapComponent() {
-    //[38.7946,-98.5348], 4.5
-
     useEffect(() => {
         return () => {
             const container = document.querySelector('.leaflet-container');
@@ -24,7 +30,9 @@ function MapComponent() {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         />
-                        <MarkersComponent/>
+                        <MapProvider>
+                            <MarkersComponent/>
+                        </MapProvider>
                     </MapContainer> 
                 </div>
             </div>
