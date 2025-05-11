@@ -33,7 +33,7 @@ func getCities(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query("SELECT id, name, lat, lon FROM locations LIMIT 1000")
+	rows, err := db.Query("SELECT id, name, lat, lon FROM locations")
 
 	if err != nil {
 		fmt.Println("Error querying from table!")
@@ -137,7 +137,6 @@ func getCity(c *gin.Context) {
 }
 
 func getWeatherForecast(c *gin.Context) {
-	fmt.Println("Entered getWeatherForecast!")
 	apiKey := os.Getenv("OPEN_WEATHER_MAP_API_KEY2")
 	client := &http.Client{}
 
@@ -287,7 +286,6 @@ func searchCities(c *gin.Context) {
 }
 
 func grabLatLon(c *gin.Context) {
-	fmt.Println("hi")
 	connectionStr := "postgres://postgres:Iainh2005@10.0.0.223:5433/airflow?sslmode=disable"
 	db, err := sql.Open("postgres", connectionStr)
 	input := c.Query("id")
@@ -322,7 +320,6 @@ func grabLatLon(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("rowData ", rowData)
 	c.IndentedJSON(http.StatusOK, rowData)
 }
 

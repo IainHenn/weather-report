@@ -62,21 +62,18 @@ function MarkersComponent() {
 }
 
 function RetrieveInfo({ cityId }) {
-    console.log("RetrieveInfo cityId:", cityId);
     const [city,setCity] = useState(null);
 
     useEffect(() => {
         fetch(`http://localhost:8080/city?id=${cityId}`)
         .then(resp => resp.json())
         .then(city => {
-            console.log(city);
             setCity(city);
         })
         .catch(err => console.log(err))
     }, [cityId])    
     
     if(!city){
-        console.log("City:", city); 
         return <div style={{ position: 'absolute', top: '20px', right: '20px', width: '40rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="overlay-stats">
                             <h1 className="text-blue-200 text-4xl text-center">Loading...</h1>
             </div>;
@@ -134,7 +131,6 @@ function RetrieveForecast({cityLat, cityLon}){
                     temperature: data.forecast_temps[i],
                 });
             });
-            console.log(groupedData);
 
             const svg = container
             .append("svg")
@@ -260,7 +256,6 @@ function RetrieveForecastWidgets({cityLat, cityLon}){
         })
         .catch(err => console.log(err));
 
-        console.log(JSON.stringify(groupedData));
     }, [cityLat, cityLon])
 
     return( 
@@ -292,7 +287,6 @@ function WeatherDay({idx, day, avgTemp, commonIcon}) {
 }
 
 function averageTemp(data: { temperature: number }[]) {
-    console.log(`data: ${JSON.stringify(data)}`);
     if (data.length === 0) return 0;
 
     let sum = 0;
@@ -325,7 +319,6 @@ function mostCommonIcon(data: {icon: string}[]) {
         }
     }
 
-    console.log(JSON.stringify(iconRecords));
 
     let highestFreq = 0;
     let highestIcon = '';
@@ -355,14 +348,12 @@ function CitySearch(){
             fetch(`http://localhost:8080/searchCities?name=${query}`)
             .then(resp => resp.json())
             .then(cities => {
-                console.log("query works!");
                 setSuggestions(cities || []);
             });
         }
     }, [query])
 
     const addCity = (city: City) => {
-        console.log("Adding... ", city.name);
         setSelectedCities([...selectedCities, city]);
     }
 
@@ -429,7 +420,6 @@ function goToCity(cityId: number, map: L.Map | null) {
     fetch(`http://localhost:8080/city/latlon?id=${cityId}`)
     .then(resp => resp.json())
     .then(data => {
-        console.log("data received ", data);
         map.setView([data.lat, data.lon], 20);
     })
 }
