@@ -53,11 +53,9 @@ function MarkersComponent() {
                 </div>
             )}
 
-            {selectedCityId && (
-                <div style={{ position: 'absolute', top: '20px', left: '45px', width: '40rem', height: '45rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="relevant-articles">
-                    <CitySearch cityId={selectedCityId} />
-                </div>
-            )}
+            <div style={{ position: 'absolute', top: '20px', left: '45px', width: '40rem', height: '45rem', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000 }} className="relevant-articles">
+                <CitySearch cityId={selectedCityId} />
+            </div>
             </>
         </>
     )
@@ -369,44 +367,52 @@ function CitySearch(){
     }
 
     return (
-        <div className="relative w-full max-w-md">
+        <div>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onBlur={() => {
-                setTimeout(() => setSuggestions([]), 200);
+            setTimeout(() => setSuggestions([]), 200);
             }}
-            className="w-full border p-2 rounded bg-white"
+            className="w-full border border-gray-300 p-3 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Search for a city"
           />
           {suggestions.length > 0 && (
-            <ul className="absolute bg-white border mt-1 w-full z-10">
+            <ul className="absolute bg-white border border-gray-300 mt-2 w-full rounded-lg shadow-lg z-10">
               {suggestions.map((city: City) => (
-                <li
-                  key={city.id}
-                  onClick={() => addCity(city)}
-                  className="cursor-pointer p-2 hover:bg-gray-100"
-                >
-                  {city.name}
-                </li>
+            <li
+              key={city.id}
+              onClick={() => addCity(city)}
+              className="cursor-pointer p-2 hover:bg-blue-100 transition-colors duration-200"
+            >
+              {city.name}
+            </li>
               ))}
             </ul>
           )}
-    
-          <div className="mt-2 flex flex-wrap gap-2">
+        
+          <div className="mt-4 flex flex-wrap gap-3">
             {(() => {
-                const map = useSharedMap();
-                return selectedCities.map((city: City) => (
-                  <button
-                    onClick={() => goToCity(city.id, map)}
-                    key={city.id}
-                    type="button"
-                    className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200"
-                  >
-                    {city.name}
-                  </button>
-                ));
+            const map = useSharedMap();
+            return selectedCities.map((city: City) => (
+            <div key={city.id} className="flex items-center space-x-2 bg-blue-100 text-blue-800 px-3 py-2 rounded-full shadow-md hover:bg-blue-200 transition-colors duration-200">
+              <button
+                onClick={() => goToCity(city.id, map)}
+                className="font-medium text-blue-200"
+              >
+                {city.name}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedCities(selectedCities.filter(selectedCity => selectedCity.id !== city.id));
+                }}
+                className="text-red-500 hover:text-red-700 transition-colors duration-200"
+              >
+                ✕
+              </button>
+            </div>
+            ));
             })()}
           </div>
         </div>
@@ -424,7 +430,7 @@ function goToCity(cityId: number, map: L.Map | null) {
     .then(resp => resp.json())
     .then(data => {
         console.log("data received ", data);
-        map.setView([data.lat, data.lon], 10);
+        map.setView([data.lat, data.lon], 20);
     })
 }
 
