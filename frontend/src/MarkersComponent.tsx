@@ -432,7 +432,9 @@ function CitySearch(){
               </button>
               <button
                 onClick={() => {
-                  setSelectedCities(selectedCities.filter(selectedCity => selectedCity.id !== city.id));
+                    const updatedCities = selectedCities.filter(selectedCities => selectedCities.id !== city.id);
+                    localStorage.setItem("selectedCities", JSON.stringify(updatedCities));
+                    setSelectedCities(updatedCities);
                 }}
                 className="text-red-500 hover:text-red-700 transition-colors duration-200"
               >
