@@ -14,6 +14,8 @@ function MarkersComponent() {
     const [cities, setCities] = useState([]);
     const [selectedCityId,setSelectedCityId] = useState(null);
     const [selectedForecast, setSelectedForecast] = useState(null);
+    const map = useSharedMap();
+
     useEffect(() => {
         const fetchCities = async () => {
             try {
@@ -24,8 +26,34 @@ function MarkersComponent() {
                 console.log(err);
             }
         };
-        fetchCities();
-    }, []);
+
+        const fetchBoundedCities = async () => {
+            try {
+                const bounds = map.getBounds();
+                const topLeft = bounds.getNorthWest();
+                const bottomRight = bounds.getSouthEast();
+                const url = `http://localhost:8080/citiesInBounds?minLat=${bottomRight.lat}&maxLat=${topLeft.lat}&minLon=${topLeft.lng}&maxLon=${bottomRight.lng}`;
+
+                const resp = await fetch(url);
+                const cities = await resp.json();
+                setCities(cities);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        if (!map) {
+            fetchCities();
+        } else {
+            fetchBoundedCities();
+            const onMoveEnd = () => fetchBoundedCities();
+            map.on('moveend', onMoveEnd);
+
+            return () => {
+                map.off('moveend', onMoveEnd);
+            };
+        }
+    }, [map]);
     return (
         <>
             <MarkerClusterGroup chunkedLoading>
